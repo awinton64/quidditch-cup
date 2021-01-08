@@ -10,6 +10,12 @@
         border-radius: 5px;
       }
 
+      .gold {
+          background-color: gold;
+          padding: 3px;
+          border-radius: 5px;
+      }
+
       li {
         padding: 6px;
       }
@@ -32,8 +38,22 @@
         visibility: hidden;
         transition: 0.5s transform;
       }
+
+      #snitch {
+        position: absolute;
+        background-size: cover;
+        background-image: url("img/snitch.png");
+        width: 32px;
+        height: 32px;
+        visibility: hidden;
+        transition: 0.5s transform;
+      }
     </style>
   </head>
+
+
+
+
   <body>
     <h1>Quidditch Cup</h1>
     <h2>Version 1.0</h2>
@@ -41,53 +61,140 @@
     <h2>Rules</h2>
     <ol>
       <li>Clicking on the <span class="brown">Quaffle</span> earns <b>10 points</b>.</li>
-      <li>Refresh your browser to restart the game</li>
+      <li>Clicking on the <span class="gold">Gold Snitch</span> earns <strong>150 points</strong> and <strong>ends the game</strong>.</li>
+      <li>The game will automatically end after <strong>15 seconds</strong> if the Golden Snitch is not captured.</li>
+
     </ol>
     <h3>Score: <span id="scoreboard">No Score Yet</span></h3>
+    <h3>Timer: <span id="timer">15 seconds</span></h3>
 
     <button onclick="startGame()">New Game</button>
 
     <div id="gameboard">
       <div id="quaffle" onclick="scoreQuaffle()"></div>
+      <div id="snitch" onclick="scoreSnitch()"></div>
     </div>
 
+
+
+
     <script>
-      var score = 0;
-      var scoreboard = document.getElementById("scoreboard");
-      var quaffle = document.getElementById("quaffle");
-      // Variables to help animate our quaffle.
-      var quaffleSpeed = 1500; // speed in Milliseconds.
-      var quaffleTimeoutID = null;
-
-      function startGame() {
-          score = 0
-          scoreboard.innerHTML = score;
-          quaffle.style.visibility = "visible";
-          moveQuaffle();
-
-      }
-
-      function moveQuaffle() {
-        // Generate a random x,y position for our Quaffle
-        let randY = Math.floor(Math.random() * 436 + 1); // 500 (the width of the game board) - 64 (the width of the quaffle) = 436 px
-        let randX = Math.floor(Math.random() * 436 + 1);
-
-        // Use CSS to animate the transition from our current position to the new position.
-        quaffle.style.transform = `translate(${randX}px, ${randY}px)`; // Use a 'template literal' (backtick) to generate the string we need for our css animation.
-
-        // If we had a move that hasn't completed, let's clear it so we can make a new one.
-        //clearTimeout(quaffleTimeoutID)
+        var score = 0;
+        var scoreboard = document.getElementById("scoreboard");
+        var timer = document.getElementById("timer");
+        var quaffle = document.getElementById("quaffle");
+        var snitch = document.getElementById("snitch");
         
-        // Move the Quaffle after so many seconds.
-        quaffleTimeoutID = setTimeout(moveQuaffle, quaffleSpeed); // Note: we keep track of this timer by storing it in the quaffleTimeoutID variable in case we need to cancel the movement later.
+        // Variables to help animate our quaffle.
+        var quaffleSpeed = 1500; // speed in Milliseconds.
+        var quaffleTimeoutID = null;
+        var snitchSpeed = 400; // speed in Milliseconds.
+        var snitchTimeoutID = null;
+        var time = 15
+
+
+        function startGame() {
+            score = 0
+            scoreboard.innerHTML = score;
+            timer.innerHTML = time;
+            quaffle.style.visibility = "visible";
+            snitch.style.visibility = "visible";
+            moveQuaffle();
+            moveSnitch();
+            startTimer();
+        }
+
+        function moveQuaffle() {
+            if (time === 0) {
+                endGame()
+            } else {
+            // Generate a random x,y position for our Quaffle
+            let randY = Math.floor(Math.random() * 436 + 1); // 500 (the width of the game board) - 64 (the width of the quaffle) = 436 px
+            let randX = Math.floor(Math.random() * 436 + 1);
+
+            // Use CSS to animate the transition from our current position to the new position.
+            quaffle.style.transform = `translate(${randX}px, ${randY}px)`; // Use a 'template literal' (backtick) to generate the string we need for our css animation.
+
+            // If we had a move that hasn't completed, let's clear it so we can make a new one.
+            clearTimeout(quaffleTimeoutID) // why do we need this line??
+            
+            scoreboard.innerHTML = score;
+
+            quaffleTimeoutID = setTimeout(moveQuaffle, quaffleSpeed);
+            }
+        }
+
+        function moveSnitch() {
+            if (time === 0) {
+                endGame()
+            } else {
+            // Generate a random x,y position for our Quaffle
+            let randY = Math.floor(Math.random() * 468 + 1); // 500 (the width of the game board) - 64 (the width of the quaffle) = 436 px
+            let randX = Math.floor(Math.random() * 468 + 1);
+
+            // Use CSS to animate the transition from our current position to the new position.
+            snitch.style.transform = `translate(${randX}px, ${randY}px)`; // Use a 'template literal' (backtick) to generate the string we need for our css animation.
+
+            // If we had a move that hasn't completed, let's clear it so we can make a new one.
+            clearTimeout(snitchTimeoutID)
+            
+            scoreboard.innerHTML = score;
+            
+            snitchTimeoutID = setTimeout(moveSnitch, snitchSpeed);
+            }
+        }
+
+
+        function startTimer() {
+            setInterval (updateTime, 1000)
+        }
+
+        function updateTime() {
+            if (time === 0) {
+                endGame()
+            } else {
+            time -= 1
+            timer.innerHTML = time;
+            }
         }
 
         function scoreQuaffle() {
-            score = score + 10;
+            if (time === 0) {
+                null
+            } else {
+            score += 10;
             scoreboard.innerHTML = score;
-            clearTimeout(quaffleTimeoutID); // why do we need this line??
+            clearTimeout(quaffleTimeoutID); 
             moveQuaffle(); 
+            }
         }
+
+        function scoreSnitch() {
+            if (time === 0) {
+                null
+            } else {
+            score += 150;
+            scoreboard.innerHTML = score;
+            clearTimeout(snitchTimeoutID);
+            //moveSnitch();
+            endGame()
+            //addName()
+            }
+        }
+
+        function endGame() {
+            score.innerHTML = "No Score Yet"
+            timer.innerHTML = "Out of Time"
+            //alert("GAME OVER")
+        }
+
+        // function addName() {
+        //     var name = prompt("Please enter your name for the Leaderboard!", "John Smith");
+    
+        //     if (name != null) {
+        //         alert("Keep it up" + name + " years" );
+        //     }
+        // }
     
     </script>
   </body>
