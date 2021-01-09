@@ -57,7 +57,7 @@
   <body>
     <h1>Quidditch Cup</h1>
     <h2>Version 1.0</h2>
-    <p>The object of the game of Quidditch is to score more the most points!</p>
+    <p>The object of the game of Quidditch is to score the most points!</p>
     <h2>Rules</h2>
     <ol>
       <li>Clicking on the <span class="brown">Quaffle</span> earns <b>10 points</b>.</li>
@@ -88,13 +88,20 @@
         // Variables to help animate our quaffle.
         var quaffleSpeed = 1500; // speed in Milliseconds.
         var quaffleTimeoutID = null;
-        var snitchSpeed = 400; // speed in Milliseconds.
+        var snitchSpeed = 2000; // speed in Milliseconds.
         var snitchTimeoutID = null;
-        var time = 15
+        var time = 15;
+        var timerTimeoutID = null;
+
+        var gameOver = null;
 
 
         function startGame() {
             score = 0
+            time = 15
+            
+            gameOver = false
+      
             scoreboard.innerHTML = score;
             timer.innerHTML = time;
             quaffle.style.visibility = "visible";
@@ -102,11 +109,27 @@
             moveQuaffle();
             moveSnitch();
             startTimer();
+            console.log("gameStarted")
+            console.log(gameOver)
+        }
+
+        function startTimer() {
+            clearInterval(timerTimeoutID)
+            timerTimeoutID = setInterval (updateTime, 1000)
+        }
+
+        function updateTime() {
+            if (time === 0) {
+                endGame()
+            } else {
+            time -= 1
+            timer.innerHTML = time;
+            }
         }
 
         function moveQuaffle() {
-            if (time === 0) {
-                endGame()
+            if (gameOver === true) {
+                null
             } else {
             // Generate a random x,y position for our Quaffle
             let randY = Math.floor(Math.random() * 436 + 1); // 500 (the width of the game board) - 64 (the width of the quaffle) = 436 px
@@ -122,11 +145,14 @@
 
             quaffleTimeoutID = setTimeout(moveQuaffle, quaffleSpeed);
             }
+            //  else {
+            //   console.log("ErrorQ")
+            // }
         }
 
         function moveSnitch() {
-            if (time === 0) {
-                endGame()
+            if (gameOver === true) {
+                null
             } else {
             // Generate a random x,y position for our Quaffle
             let randY = Math.floor(Math.random() * 468 + 1); // 500 (the width of the game board) - 64 (the width of the quaffle) = 436 px
@@ -144,38 +170,23 @@
             }
         }
 
-
-        function startTimer() {
-            setInterval (updateTime, 1000)
-        }
-
-        function updateTime() {
-            if (time === 0) {
-                endGame()
-            } else {
-            time -= 1
-            timer.innerHTML = time;
-            }
-        }
-
         function scoreQuaffle() {
-            if (time === 0) {
+            if (gameOver === true) {
                 null
             } else {
-            score += 10;
-            scoreboard.innerHTML = score;
-            clearTimeout(quaffleTimeoutID); 
-            moveQuaffle(); 
-            }
-        }
+                score += 10;
+                scoreboard.innerHTML = score;
+                clearTimeout(quaffleTimeoutID); 
+                moveQuaffle();
+            } 
+          }
 
         function scoreSnitch() {
-            if (time === 0) {
+            if (gameOver === true) {
                 null
             } else {
             score += 150;
             scoreboard.innerHTML = score;
-            clearTimeout(snitchTimeoutID);
             //moveSnitch();
             endGame()
             //addName()
@@ -183,8 +194,13 @@
         }
 
         function endGame() {
-            score.innerHTML = "No Score Yet"
-            timer.innerHTML = "Out of Time"
+            gameOver = true
+            console.log(gameOver)
+            clearTimeout(snitchTimeoutID);
+            clearTimeout(quaffleTimeoutID)
+            clearTimeout(timerTimeoutID)
+            scoreboard.innerHTML = "You scored " + score + " points."
+            timer.innerHTML = "Game Over"
             //alert("GAME OVER")
         }
 
